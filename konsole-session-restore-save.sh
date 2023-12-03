@@ -7,7 +7,7 @@
 
 COMMAND='' # Default command if there is no command for the tab
 SAVE_PATH="$(dirname $(realpath $0))"/data
-mkdkr -p $SAVE_PATH
+mkdir -p $SAVE_PATH
 
 rm -f "$SAVE_PATH"/*
 
