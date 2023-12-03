@@ -6,7 +6,8 @@
 # Adapted from https://unix.stackexchange.com/a/593779/41618
 
 COMMAND='' # Default command if there is no command for the tab
-SAVE_PATH="$(dirname $(realpath $0))"/data
+XDG_DATA_HOME=${XDG_DATA_HOME:="$HOME/.local/share"}
+SAVE_PATH="$XDG_DATA_HOME"/konsole-session-restore
 mkdir -p $SAVE_PATH
 
 rm -f "$SAVE_PATH"/*
