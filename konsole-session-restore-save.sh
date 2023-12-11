@@ -12,24 +12,26 @@ mkdir -p $SAVE_PATH
 
 rm -f "$SAVE_PATH"/*
 
-pids=$(pgrep 'konsole' -f -u $USER)
+if [[ "$XDG_SESSION_TYPE" == "wayland" || "$1" == "force" ]] ; then
+    pids=$(pgrep 'konsole' -f -u $USER)
 
-while IFS= read -r pid; do
-    if [[ $(readlink -f /proc/$pid/exe) == "/usr/bin/konsole" ]]; then
-        SESSIONS=$(qdbus org.kde.konsole-$pid | grep /Sessions/)
-        if [[ ${SESSIONS} ]] ; then
-            for i in ${SESSIONS}; do
-                FORMAT=$(qdbus org.kde.konsole-$pid $i tabTitleFormat 0)
-                PROCESSID=$(qdbus org.kde.konsole-$pid $i processId)
-                CWD=$(pwdx ${PROCESSID} | sed -e "s/^[0-9]*: //")
-                # Do not record command. Re-running a command automatically looks dangerous to me.
-                #if [[ $(pgrep --parent ${PROCESSID}) ]] ; then
-                #    CHILDPID=$(pgrep --parent ${PROCESSID})
-                #    COMMAND=$(ps -p ${CHILDPID} -o args=)
-                #fi 
-                echo "workdir: ${CWD};; title: ${FORMAT};; command:${COMMAND}" >> "${SAVE_PATH}/${pid}"
-                COMMAND=''
-            done
+    while IFS= read -r pid; do
+        if [[ $(readlink -f /proc/$pid/exe) == "/usr/bin/konsole" ]]; then
+            SESSIONS=$(qdbus org.kde.konsole-$pid | grep /Sessions/)
+            if [[ ${SESSIONS} ]] ; then
+                for i in ${SESSIONS}; do
+                    FORMAT=$(qdbus org.kde.konsole-$pid $i tabTitleFormat 0)
+                    PROCESSID=$(qdbus org.kde.konsole-$pid $i processId)
+                    CWD=$(pwdx ${PROCESSID} | sed -e "s/^[0-9]*: //")
+                    # Do not record command. Re-running a command automatically looks dangerous to me.
+                    #if [[ $(pgrep --parent ${PROCESSID}) ]] ; then
+                    #    CHILDPID=$(pgrep --parent ${PROCESSID})
+                    #    COMMAND=$(ps -p ${CHILDPID} -o args=)
+                    #fi 
+                    echo "workdir: ${CWD};; title: ${FORMAT};; command:${COMMAND}" >> "${SAVE_PATH}/${pid}"
+                    COMMAND=''
+                done
+            fi
         fi
-    fi
-done <<< "$pids"
+    done <<< "$pids"
+fi
